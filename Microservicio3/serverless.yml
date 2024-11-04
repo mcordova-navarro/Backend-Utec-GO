@@ -1,0 +1,107 @@
+service: gestion-estudiantil
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+
+resources:
+  Resources:
+    # Tabla de Alojamiento
+    TAlojamiento:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: t_alojamiento
+        AttributeDefinitions:
+          - AttributeName: tenant_id
+            AttributeType: S
+          - AttributeName: alojamiento_id
+            AttributeType: S
+          - AttributeName: fecha_creacion
+            AttributeType: S # Para GSI
+          - AttributeName: ubicacion
+            AttributeType: S # Para LSI
+        KeySchema:
+          - AttributeName: tenant_id
+            KeyType: HASH
+          - AttributeName: alojamiento_id
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        GlobalSecondaryIndexes:
+          - IndexName: tenant_id-fecha_creacion-index
+            KeySchema:
+              - AttributeName: tenant_id
+                KeyType: HASH
+              - AttributeName: fecha_creacion
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        LocalSecondaryIndexes:
+          - IndexName: ubicacion_index
+            KeySchema:
+              - AttributeName: tenant_id
+                KeyType: HASH
+              - AttributeName: ubicacion
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    # Tabla de Pagos
+    TPagos:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: t_pagos
+        AttributeDefinitions:
+          - AttributeName: tenant_id
+            AttributeType: S
+          - AttributeName: pago_id
+            AttributeType: S
+          - AttributeName: fecha_pago
+            AttributeType: S # Para GSI
+          - AttributeName: monto
+            AttributeType: N # Para LSI
+        KeySchema:
+          - AttributeName: tenant_id
+            KeyType: HASH
+          - AttributeName: pago_id
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        GlobalSecondaryIndexes:
+          - IndexName: tenant_id-fecha_pago-index
+            KeySchema:
+              - AttributeName: tenant_id
+                KeyType: HASH
+              - AttributeName: fecha_pago
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        LocalSecondaryIndexes:
+          - IndexName: monto_index
+            KeySchema:
+              - AttributeName: tenant_id
+                KeyType: HASH
+              - AttributeName: monto
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+functions:
+  crearPago:
+    handler: functions/crearPago.handler
+  buscarPago:
+    handler: functions/buscarPago.handler
+  eliminarPago:
+    handler: functions/eliminarPago.handler
+  crearAlojamiento:
+    handler: functions/crearAlojamiento.handler
+  buscarAlojamiento:
+    handler: functions/buscarAlojamiento.handler
+  eliminarAlojamiento:
+    handler: functions/eliminarAlojamiento.handler
+  validarToken:
+    handler: functions/validarToken.handler
