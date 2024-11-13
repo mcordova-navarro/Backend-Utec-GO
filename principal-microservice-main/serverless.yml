@@ -1,0 +1,168 @@
+org: enzogomez
+service: programa-service
+
+provider:
+  name: aws
+  runtime: python3.8
+  region: us-east-1
+  stage: dev
+  iam:
+    role: arn:aws:iam::353553552499:role/LabRole
+
+functions:
+  createProgram:
+    handler: create_program.lambda_handler  
+    events:
+      - http:
+          path: programa/create
+          method: post
+          cors: true
+          integration: lambda
+
+  searchProgram:
+    handler: search_program.lambda_handler  
+    events:
+      - http:
+          path: programa/search
+          method: post
+          cors: true
+          integration: lambda
+
+  deleteProgram:
+    handler: delete_program.lambda_handler  
+    events:
+      - http:
+          path: programa/delete
+          method: post
+          cors: true
+          integration: lambda
+
+  updateProgram:
+    handler: update_program.lambda_handler  
+    events:
+      - http:
+          path: programa/update
+          method: put
+          cors: true
+          integration: lambda
+
+  createEstudiante:
+    handler: create_estudiante.lambda_handler  
+    events:
+      - http:
+          path: estudiante/create
+          method: post
+          cors: true
+          integration: lambda
+
+  searchEstudiante:
+    handler: search_estudiante.lambda_handler  
+    events:
+      - http:
+          path: estudiante/search
+          method: post
+          cors: true
+          integration: lambda
+          
+  deleteEstudiante:
+    handler: delete_estudiante.lambda_handler  
+    events:
+      - http:
+          path: estudiante/delete
+          method: post
+          cors: true
+          integration: lambda
+
+  updateEstudiante:
+    handler: update_estudiante.lambda_handler  
+    events:
+      - http:
+          path: estudiante/update
+          method: put
+          cors: true
+          integration: lambda
+
+  createInscripcion:
+    handler: create_inscripcion.lambda_handler
+    events:
+      - http:
+          path: inscripcion/create
+          method: post
+          cors: true
+          integration: lambda
+
+  updateInscripcion:
+    handler: update_inscripcion.lambda_handler
+    events:
+      - http:
+          path: inscripcion/update
+          method: put
+          cors: true
+          integration: lambda
+
+  searchInscripcion:
+    handler: search_inscripcion.lambda_handler
+    events:
+      - http:
+          path: inscripcion/search
+          method: post
+          cors: true
+          integration: lambda
+
+
+resources:
+  Resources:
+    EstudiantesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: estudiantes
+        AttributeDefinitions:
+          - AttributeName: "universidad"
+            AttributeType: "S"
+          - AttributeName: "id_estudiante"
+            AttributeType: "S"
+          
+        KeySchema:
+          - AttributeName: "universidad"
+            KeyType: "HASH"
+          - AttributeName: "id_estudiante"
+            KeyType: "RANGE"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+    ProgramaTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: programa
+        AttributeDefinitions:
+          - AttributeName: "id_programa"
+            AttributeType: "S"
+          - AttributeName: "fecha_inicio"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id_programa"
+            KeyType: "HASH"
+          - AttributeName: "fecha_inicio"
+            KeyType: "RANGE"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    
+    InscripcionesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: inscripciones
+        AttributeDefinitions:
+          - AttributeName: "id_estudiante"
+            AttributeType: "S"
+          - AttributeName: "id_programa"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id_estudiante"
+            KeyType: "HASH"
+          - AttributeName: "id_programa"
+            KeyType: "RANGE"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
